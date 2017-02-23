@@ -4,11 +4,11 @@
 typedef  struct Tree
 {
 	int data;
-	struct Tree *left
-	struct Tree *right
+	struct Tree *left;
+	struct Tree *right;
 } tree;
 
-tree *get_node(tree *root);
+tree *get_node()
 {
 	tree *tmp;
 	tmp = (tree *)malloc(sizeof(tree));
