@@ -1,3 +1,5 @@
+// ^0^ i'm hacker!! 
+
 #include <stdio.h>
 #include <stdlib.h>
 
