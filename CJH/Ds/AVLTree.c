@@ -30,6 +30,29 @@ Node* getNode();
 void treeIns(int data, Node** root);
 void printTree(Node** root);
 
+void lvModifyAfterRotate(Node* node) {
+	printf("lvModifyAfterRotate : node : %d\t left : %d\t right : %d\n", node -> data, node -> leftLink ? node -> leftLink -> data : 0, node -> rightLink ? node -> rightLink -> data : 0);
+	printf("lvModifyAfterRotate : nodeLv : %d\t leftLv : %d\t rightLv : %d\n", node -> lv, node -> leftLink ? node -> leftLink -> lv : 0, node -> rightLink ? node -> rightLink -> lv : 0);
+
+	int lv_left, lv_right;
+	if(node -> leftLink) {
+		lv_left = node -> leftLink -> leftLink ? node -> leftLink -> leftLink -> lv : 0;
+		lv_left -= node -> leftLink -> rightLink ? node -> leftLink -> rightLink -> lv : 0;
+	}else lv_left = 0;
+	printf("lv_left : %d\n", lv_left);
+	if(node -> rightLink) {
+		lv_right = node -> rightLink -> leftLink ? node -> rightLink -> leftLink -> lv : 0;
+		lv_right -= node -> rightLink -> rightLink ? node -> rightLink -> rightLink -> lv : 0;
+	}else lv_right = 0;
+	printf("lv_right : %d\n", lv_right);
+
+	node -> leftLink ? node -> leftLink -> lv = lv_left : 0;
+	node -> rightLink ? node -> rightLink -> lv = lv_right : 0;
+	node -> lv = lv_left - lv_right;
+	printf("node info(data) : %d\tnode lv : %d\tleft lv : %d\t right lv : %d\n\n", node -> data, lv_left - lv_right, lv_left, lv_right);
+	printf("lvModifyAfterRotate : nodeLv : %d\t leftLv : %d\t rightLv : %d\n\n", node -> lv, node -> leftLink ? node -> leftLink -> lv : 0, node -> rightLink ? node -> rightLink -> lv : 0);
+}
+
 void insertNode(Node** pLink, int data) {
 	*pLink = getNode();
 	(**pLink).data = data;
@@ -37,16 +60,21 @@ void insertNode(Node** pLink, int data) {
 
 Node* lvModify(Node** stack, int limit, int rev) {
 	Node* recentlyUnbalanceNode = NULL;
-	int i = 0;
+	int i = 0, mLimit = limit;
 
 	for(limit; limit>=0; limit--, i++) {
+		rev = mLimit != limit ? stack[limit] -> leftLink == stack[limit + 1] ? 1 : -1 : rev;
 		printf("stack[%d] -> data : %d\n", i, stack[limit] -> data);
 		printf("stack[%d] -> left : %p\n", i, stack[limit] -> leftLink);
 		printf("stack[%d] -> right : %p\n", i, stack[limit] -> rightLink);
 		stack[limit] -> lv = i + 1;
+		printf("stack[%d] -> lv : %d\n", i, stack[limit] -> lv);
 		int res = (stack[limit] -> leftLink ? stack[limit] -> leftLink -> lv : 0)
 			- (stack[limit] -> rightLink ? stack[limit] -> rightLink -> lv : 0)
 			+ rev;
+		printf("res left side : %d\n", (stack[limit] -> leftLink ? stack[limit] -> leftLink -> lv : 0));
+		printf("res right side : %d\n", (stack[limit] -> rightLink ? stack[limit] -> rightLink -> lv : 0));
+		printf("rev : %d\n", rev);
 		printf("res : %d\n", res);
 		if((res > 1 || res < -1) && !(recentlyUnbalanceNode)) recentlyUnbalanceNode = i > 0 ? stack[i-1] : stack[i];
 		printf("height %d\n", stack[i] -> lv);
@@ -63,67 +91,71 @@ int nullToZero(Node* node) {
 	return node ? node -> lv : 0;
 }
 
-void rotateRR(Node* node) {
+Node* rotateRR(Node* node) {
+	printf("aaaaaaaa\n");
 	Node* cur = node -> rightLink;
 	Node temp = *node;
 	*node = *cur;
 	*cur = temp;
+	cur -> rightLink = node -> leftLink;
+	node -> leftLink = cur;
+
+	// printf("\nnode %p\n", node);
+	// printf("\nnode data %d\n", node -> data);
+	// printf("node l %p\n", node -> leftLink);
+	// printf("node r %p\n\n", node -> rightLink);
+
+	// printf("cur %p\n", cur);
+	// printf("cur l %p\n", cur -> leftLink);
+	// printf("cur r %p\n\n", cur -> rightLink);
+
+	// printf("node -right %p\n", node -> rightLink);
+	// printf("node -right l %p\n", node -> rightLink -> leftLink);
+	// printf("node -right r %p\n\n", node -> rightLink -> rightLink);
+	printf("RR cur data : %d\n", cur -> data);
+	return node;
+}
+
+Node* rotateLL(Node* node) {
+	printf("bbbbbbbb\n");
+	Node* cur = node -> leftLink;
+	Node temp = *node;
+	*node = *cur;
+	*cur = temp;
+	cur -> leftLink = node -> rightLink;
+	node -> rightLink = cur;
 
 	printf("\nnode %p\n", node);
+	printf("\nnode data %d\n", node -> data);
 	printf("node l %p\n", node -> leftLink);
 	printf("node r %p\n\n", node -> rightLink);
 
 	printf("cur %p\n", cur);
+	printf("\ncur data %d\n", cur -> data);
 	printf("cur l %p\n", cur -> leftLink);
 	printf("cur r %p\n\n", cur -> rightLink);
 
-	printf("node -right %p\n", node -> rightLink);
-	printf("node -right l %p\n", node -> rightLink -> leftLink);
-	printf("node -right r %p\n\n", node -> rightLink -> rightLink);
+	printf("node -left %p\n", node -> leftLink);
+	if(node -> leftLink) {
+		printf("node -left l %p\n", node -> leftLink -> leftLink);
+		printf("node -left r %p\n\n", node -> leftLink -> rightLink);
+	}
 
-	// printf("node - right %d\n", node -> rightLink -> data);
-	// node -> leftLink = cur;
-	// cur -> rightLink = node -> rightLink;
-	// printf("cur right leaf %d\n", cur -> rightLink -> data);
-
-	// Node* right = NULL;
-	// right = node -> rightLink;
-	// node -> rightLink = right -> leftLink;
-	// right -> leftLink = node;
-
-	// node -> rightLink = node -> rightLink;
-	// Node* temp = node -> rightLink;
-	// node -> rightLink = node -> rightLink -> leftLink;
-	// temp -> leftLink = node;
-	// Node temp1 = NULL;
-	// Node* temp2 = NULL;
-	// printf("node1 : %d\n", node -> data);
-	// temp1 = *node; // par 주소
-	// printf("node2 : %d\n", temp1.data);
-	// *node = *(node -> rightLink); // par 구조체에 par의 오른쪽 자식의 구조체 대입
-	// printf("node222 : %d\n", temp1.data);
-	// printf("node3 : %d\n", node -> data);
-	// temp2 = node -> leftLink; // par의 오른쪽 자식의 왼쪽 link
-	// printf("node4 : %d\n", temp2);
-	// node -> leftLink = &temp1; // par의 오른쪽 자식의 left에 par 주소
-	// printf("node5 : %d\n", node -> leftLink -> data);
-	// temp1 -> rightLink = temp2; // par의 오른쪽 link에 par의 오른쪽 자식의 왼쪽 link
-
+	printf("LL cur data : %d\n", cur -> data);
+	return node;
 }
 
-void rotateLL(Node* node) {
-
+Node* rotateRL(Node* node) {
+	rotateLL(node -> rightLink);
+	return rotateRR(node) -> rightLink;
 }
 
-void rotateRL(Node* node) {
-
+Node* rotateLR(Node* node) {
+	rotateRR(node -> leftLink);
+	return rotateLL(node) -> leftLink;
 }
 
-void rotateLR(Node* node) {
-
-}
-
-void rotate(Node* par, int rev) {
+Node* rotate(Node* par, int rev) {
 	// int jud = ((*par) -> leftLink ? (*par) -> leftLink -> lv : 0)
 	// 			-  ((*par) -> leftLink ? (*par) -> rightLink -> lv : 0);
 	int jud = nullToZero(par -> leftLink) - nullToZero(par -> rightLink) + rev;
@@ -135,7 +167,7 @@ void rotate(Node* par, int rev) {
 		else rotateLR(par);
 	}else {
 		int temp = nullToZero(par -> rightLink -> leftLink) - nullToZero(par -> rightLink -> rightLink) + rev;
-		printf("temp%d\n", temp);
+		printf("temp %d\n", temp);
 		if(temp > 0) rotateRL(par);
 		else rotateRR(par);
 	}
@@ -143,11 +175,11 @@ void rotate(Node* par, int rev) {
 
 int main(int argc, char** argv) {
 	Node* root = NULL;
-	// int data[] = {50, 20, 10, 40, 30, 35, 80, 90, 100, 60, 70, 65};
-	int data[] = {10, 20, 30};
+	int data[] = {50, 20, 10, 40, 30, 35, 80, 90, 100, 60, 70, 65};
+	// int data[] = {10, 30, 20};
 	int i;
-	for(i=0; i<3; i++) treeIns(data[i], &root);
-	printTree(&root);
+	for(i=0; i<12; i++) treeIns(data[i], &root);
+	// printTree(&root);
 	return 0;
 }
 
@@ -172,15 +204,12 @@ void treeIns(int data, Node** mRoot) {
 			Node* temp = NULL;
 			if(data > node -> data) {
 				if(node -> rightLink) {
-					printf("here1\n");
 					node = node -> rightLink;
 				}else {
-					printf("here2\n");
 					insertNode(&node -> rightLink, data);
-					printf("abc %d\n", stack[i] -> data);
 					temp = lvModify(stack, i, -1);
-					if(temp) rotate(temp, -1);
-					return ;
+					if(temp) lvModifyAfterRotate(rotate(temp, -1));
+					break ;
 				}
 			}else if(data < node -> data) {
 				if(node -> leftLink) {
@@ -188,13 +217,13 @@ void treeIns(int data, Node** mRoot) {
 				}else {
 					insertNode(&node -> leftLink, data);
 					temp = lvModify(stack, i, 1);
-					if(temp) rotate(temp, 1);
-					return ;
+					if(temp) lvModifyAfterRotate(rotate(temp, 1));
+					break ;
 				}
 			}
 			else {
 				printf("already exgist\n");
-				return ;
+				break ;
 			}
 			i ++;
 		}
@@ -209,6 +238,8 @@ void treeIns(int data, Node** mRoot) {
 		printf("root tree ::: %p\n", *mRoot);
 		printf("\n\n\n\n");
 	}
+
+	printTree(mRoot);
 }
 
 void printTree(Node** mRoot) {
@@ -218,8 +249,10 @@ void printTree(Node** mRoot) {
 		printf("node LV : %d\t", root -> lv);
 		printf("node data : %d\t", root -> data);
 		printf("node ADDR : %p\t", root);
-		printf("node LEFT link : %p\t", root -> leftLink);
+		printf("node LEFT link : %p\t\t", root -> leftLink);
 		printf("node RIGHT link  %p\n", root -> rightLink);
+		printf("node LEFT data : %d\t", root -> leftLink ? root -> leftLink -> data : -1);
+		printf("node RIGHT data  %d\n", root -> rightLink ? root -> rightLink -> data : -1);
 		if(root -> leftLink) printTree(&root -> leftLink);
 		if(root -> rightLink) printTree(&root -> rightLink);
 	}
