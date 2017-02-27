@@ -18,7 +18,7 @@ Node* rotateLL(Node* node);
 Node* rotateRL(Node* node);
 Node* rotateLR(Node* node);
 void rotate(Node* node);
-Node* compareColor(Node** stack, int size);
+void compareColor(Node** stack, int size);
 // Node* renewLv(Node** stack, int size);
 // void lvModify(Node* node);
 Node* getNode();
@@ -27,6 +27,6 @@ void treeIns(int data, Node** mRoot);
 void printTree(Node** mRoot);
 int findMaxAtLeftSubTree(Node** stack, int* size);
 int findMaxAtRightSubTree(Node** stack, int* size);
-void treeDel(int data, Node** mRoot);
+// void treeDel(int data, Node** mRoot);
 
 #endif
