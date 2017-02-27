@@ -151,7 +151,7 @@ void treeIns(int data, Node** mRoot) {
 	printTree(mRoot);
 }
 
-int findMaxAtLeftSubTree(Node** stack, int* mSize) {
+int findMaxAtLeftSubTree(Node** stack, int* mSize, int* color) {
 	int i = 0, data, size = *mSize;
 	while(TRUE) {
 		if(stack[size + i] -> rightLink) {
@@ -161,6 +161,7 @@ int findMaxAtLeftSubTree(Node** stack, int* mSize) {
 		}else if(!i) stack[size + (i - 1)] -> leftLink = stack[size + i] -> leftLink ? stack[size + i] -> leftLink : NULL;
 		else stack[size + (i - 1)] -> rightLink = stack[size + i] -> leftLink ? stack[size + i] -> leftLink : NULL;
 		data = stack[size + i] -> data;
+		*color = stack[size + i] -> color;
 		free(stack[size + i]);
 		stack[size + i] = NULL;
 		*mSize += i - 1;
@@ -168,7 +169,7 @@ int findMaxAtLeftSubTree(Node** stack, int* mSize) {
 	}
 }
 
-int findMaxAtRightSubTree(Node** stack, int* mSize) {
+int findMaxAtRightSubTree(Node** stack, int* mSize, int* color) {
 	int i = 0, data, size = *mSize;
 	while(TRUE) {
 		if(stack[size + i] -> leftLink) {
@@ -179,6 +180,7 @@ int findMaxAtRightSubTree(Node** stack, int* mSize) {
 		else if(!i) stack[size + (i - 1)] -> rightLink = stack[size + i] -> rightLink ? stack[size + i] -> rightLink : NULL;
 		else stack[size + (i - 1)] -> leftLink = stack[size + i] -> rightLink ? stack[size + i] -> rightLink : NULL;
 		data = stack[size + i] -> data;
+		*color = stack[size + i] -> color;
 		free(stack[size + i]);
 		stack[size + i] = NULL;
 		*mSize += i - 1;
@@ -186,44 +188,65 @@ int findMaxAtRightSubTree(Node** stack, int* mSize) {
 	}
 }
 
-// void treeDel(int data, Node** mRoot) {
-// 	if(*mRoot) {
-// 		Node* stack[100];
-// 		Node* node = *mRoot;
-// 		Node* tempP;
-// 		int i = 0, j = 0, newData;
-// 		while(TRUE) {
-// 			stack[i] = node;
-// 			if(data > node -> data && node -> rightLink) node = node -> rightLink;
-// 			else if(data < node -> data && node -> leftLink) node = node -> leftLink;
-// 			else if(data == node -> data){
-// 				if(node -> leftLink) {
-// 					stack[++ i] = node -> leftLink;
-// 					newData = findMaxAtLeftSubTree(stack, &i);
-// 				}else if(node -> rightLink) {
-// 					stack[++ i] = node -> rightLink;
-// 					newData = findMaxAtRightSubTree(stack, &i);
-// 				}else {
-// 					if(stack[i - 1] -> leftLink == node) stack[i - 1] -> leftLink = NULL;
-// 					else stack[i - 1] -> rightLink = NULL;
-// 					stack[i] = NULL;
-// 					i --;
-// 					free(node);
-// 					for(j = i; j>=0; j --) lvModify(stack[j]);
-// 					tempP = renewLv(stack, i);
-// 					if(tempP) rotate(tempP);
-// 					break ;
-// 				}
-// 				node -> data = newData;
-// 				for(j = i; j>=0; j --) lvModify(stack[j]);
-// 				tempP = renewLv(stack, i);
-// 				if(tempP) rotate(tempP);
-// 				break ;
-// 			}else break ;
-// 			i ++;
-// 		}
-// 	}
-// }
+void treeDel(int data, Node** mRoot) {
+	if(*mRoot) {
+		Node* stack[100];
+		Node* p = NULL;
+		Node* node = *mRoot;
+		Node* tempP;
+		int i = 0, j = 0, newData, color;
+		while(TRUE) {
+			stack[i] = node;
+			if(data > node -> data && node -> rightLink) node = node -> rightLink;
+			else if(data < node -> data && node -> leftLink) node = node -> leftLink;
+			else if(data == node -> data){
+				p = stack[i - 1];
+				if(node -> leftLink) {
+					stack[++ i] = node -> leftLink;
+					newData = findMaxAtLeftSubTree(stack, &i, &color);
+				}else if(node -> rightLink) {
+					stack[++ i] = node -> rightLink;
+					newData = findMaxAtRightSubTree(stack, &i, &color);
+				}else {
+					if(stack[i - 1] -> leftLink == node) stack[i - 1] -> leftLink = NULL;
+					else stack[i - 1] -> rightLink = NULL;
+					stack[i] = NULL;
+					i --;
+					free(node);
+					compareColor(stack, i);
+					break ;
+				}
+				node -> data = newData;
+				if(node -> color && !color) node -> color = BLACK;
+				else if(node -> color && color) {
+					Node* b = NULL;
+					if(p -> leftLink == node) {
+						b = p -> rightLink;
+						b -> color = BLACK;
+						node -> color = RED;
+						rotateLL(p);
+						if(!(p -> leftLink -> color) || !(p -> rightLink -> color)) p -> color = BLACK;
+					}else {
+						b = p -> leftLink;
+						b -> color = BLACK;
+						node -> color = RED;
+						rotateRR(p);
+						if(!(p -> leftLink -> color) || !(p -> rightLink -> color)) p -> color = BLACK;
+					}
+					else b = p -> leftLink;
+					if(!b -> color) {
+						b -> color = BLACK;
+						node -> color = RED;
+						ro
+					}
+				}
+				compareColor(stack, i);
+				break ;
+			}else break ;
+			i ++;
+		}
+	}
+}
 
 void printTree(Node** mRoot) {
 	Node* root = *mRoot;
