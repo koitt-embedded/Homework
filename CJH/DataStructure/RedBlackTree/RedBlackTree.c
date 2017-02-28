@@ -216,32 +216,7 @@ void treeDel(int data, Node** mRoot) {
 					compareColor(stack, i);
 					break ;
 				}
-				node -> data = newData;
-				if(node -> color && !color) node -> color = BLACK;
-				else if(node -> color && color) {
-					Node* b = NULL;
-					if(p -> leftLink == node) {
-						b = p -> rightLink;
-						b -> color = BLACK;
-						node -> color = RED;
-						rotateLL(p);
-						if(!(p -> leftLink -> color) || !(p -> rightLink -> color)) p -> color = BLACK;
-					}else {
-						b = p -> leftLink;
-						b -> color = BLACK;
-						node -> color = RED;
-						rotateRR(p);
-						if(!(p -> leftLink -> color) || !(p -> rightLink -> color)) p -> color = BLACK;
-					}
-					else b = p -> leftLink;
-					if(!b -> color) {
-						b -> color = BLACK;
-						node -> color = RED;
-						ro
-					}
-				}
-				compareColor(stack, i);
-				break ;
+				
 			}else break ;
 			i ++;
 		}
