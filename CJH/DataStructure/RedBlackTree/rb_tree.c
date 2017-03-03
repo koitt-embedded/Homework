@@ -116,7 +116,9 @@ void rb_tree_ins_helper(rb_tree **tree, rb_node *z)
 }
 
 /*
-
+	삽입해야 할 데이터를 갖고 있는 노드 생성 및 위치 찾아 넣은 후
+	삽입된 노드에 의해 트리가 갱신돼야 할 경우
+	트리의 갱신을 실시하는 함수
 */
 rb_node* rb_tree_ins(rb_tree **tree, int data)
 {
@@ -133,7 +135,7 @@ rb_node* rb_tree_ins(rb_tree **tree, int data)
 	// 생성한 노드 x를 트리에 저장하는 함수 호출
 	rb_tree_ins_helper(tree, x);
 
-	// 
+	// 계속 변경될 새로 삽입된 노드 x를 미리 tmp에 담아 둠
 	tmp = x;
 	// 생성한 노드의 색은 빨간색
 	x->color = RED;
@@ -161,51 +163,74 @@ rb_node* rb_tree_ins(rb_tree **tree, int data)
 				// 체크를 위해 x를 x의 할아버지로 바꿈
 				x = x->parent->parent;
 			}
-			// 
+			// 삼촌이 검은 색이라면
 			else
 			{
+				// 회전
+
+				// x가 부모의 우측 노드라면
 				if (x->parent->right == x)
 				{
+					// LR 회전을 위한 LL 회전 1회
 					x = x->parent;
 					rb_left_rot(tree, x);
 				}
 
+				// 회전 후 색 보정을 위한 작업(회전 후 부모는 검정색, 두 자식은 빨간색)
 				x->parent->color = BLACK;
 				x->parent->parent->color = RED;
 
 				rb_right_rot(tree, x->parent->parent);
 			}
 		}
+		// x의 부모가 할아버지의 오른쪽 노드라면
 		else
 		{
+			// 삼촌은 할아버지의 왼쪽 노드
 			y = x->parent->parent->left;
 
+			// 삼촌이 빨간색이면
 			if (y->color)
 			{
+				// 색 변환
+
+				// 부모 노드 검은색
 				x->parent->color = BLACK;
+				// 삼촌도 검은색
 				y->color = BLACK;
+				// 할아버지는 빨간색
 				x->parent->parent->color = RED;
+				// 다음 확인을 위해 할아버지(부모는 검은색으로 바꿔줬으므로 빨간색인 할아버지부터 확인한다.)
 				x = x->parent->parent;
 			}
+			// 삼촌이 검은색이다!
 			else
 			{
+				// 회전
+
+				// x가 부모의 왼쪽 자식이면
 				if (x->parent->left == x)
 				{
+					// RL에서 LL 회전을 위해 x에 x의 부모 대입
 					x = x->parent;
 
+					// RR 회전
 					rb_right_rot(tree, x);
 				}
 
 				x->parent->color = BLACK;
 				x->parent->parent->color = RED;
 
+				// LL 회전
 				rb_left_rot(tree, x->parent->parent);
 			}
 		}
 	}
 
+	// 루트의 색을 검정으로 갱신
 	(*tree)->root->left->color = BLACK;
 
+	// 새로 삽입된 노드 반환
 	return tmp;
 }
 
